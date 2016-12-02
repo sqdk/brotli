@@ -81,6 +81,8 @@ def main(args=None):
                         'on the quality. Defaults to 0.')
     params.add_argument('--custom-dictionary', metavar="FILE", type=str, dest='dictfile',
                         help='Custom dictionary file.', default = None)
+    params.add_argument('--comment', type=str, dest='comment',
+                        help='Archive comment.', default = None)
     # set default values using global DEFAULT_PARAMS dictionary
     parser.set_defaults(**DEFAULT_PARAMS)
 
@@ -113,6 +115,10 @@ def main(args=None):
     else:
         custom_dictionary = ''
 
+    if options.comment:
+        archive_comment = options.comment
+    else:
+        archive_comment = ''
 
     try:
         if options.decompress:
@@ -120,7 +126,7 @@ def main(args=None):
         else:
             data = brotli.compress(
                 data, mode=options.mode, quality=options.quality,
-                lgwin=options.lgwin, lgblock=options.lgblock, dictionary=custom_dictionary)
+                lgwin=options.lgwin, lgblock=options.lgblock, dictionary=custom_dictionary, comment=archive_comment)
     except brotli.error as e:
         parser.exit(1,'bro: error: %s: %s' % (e, options.infile or 'sys.stdin'))
 

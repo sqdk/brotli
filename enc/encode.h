@@ -34,7 +34,8 @@ struct BrotliParams {
         enable_dictionary(true),
         enable_transforms(false),
         greedy_block_split(false),
-        enable_context_modeling(true) {}
+        enable_context_modeling(true),
+        comment(0) {}
 
   enum Mode {
     // Default compression mode. The compressor does not know anything in
@@ -62,6 +63,7 @@ struct BrotliParams {
   bool enable_transforms;
   bool greedy_block_split;
   bool enable_context_modeling;
+  const char* comment;
 };
 
 // An instance can not be reused for multiple brotli streams.

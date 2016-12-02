@@ -107,6 +107,8 @@ PyDoc_STRVAR(compress__doc__,
 "    quality. Defaults to 0.\n"
 "  dictionary (bytes, optional): Custom dictionary. Only last sliding window\n"
 "     size bytes will be used.\n"
+"  comment (string, optional): A comment that will be added as the leading\n"
+"     metadata metablock.\n"
 "\n"
 "Returns:\n"
 "  The compressed byte string.\n"
@@ -118,6 +120,7 @@ static PyObject* brotli_compress(PyObject *self, PyObject *args, PyObject *keywd
   PyObject *ret = NULL;
   uint8_t *input, *output, *custom_dictionary;
   size_t length, output_length, custom_dictionary_length;
+  const char *comment = 0;
   BrotliParams::Mode mode = (BrotliParams::Mode) -1;
   int quality = -1;
   int lgwin = -1;
@@ -125,19 +128,20 @@ static PyObject* brotli_compress(PyObject *self, PyObject *args, PyObject *keywd
   int ok;
 
   static const char *kwlist[] = {
-      "string", "mode", "quality", "lgwin", "lgblock", "dictionary", NULL};
+      "string", "mode", "quality", "lgwin", "lgblock", "dictionary", "comment", NULL};
 
   custom_dictionary = NULL;
   custom_dictionary_length = 0;
 
-  ok = PyArg_ParseTupleAndKeywords(args, keywds, "s#|O&O&O&O&s#:compress",
+  ok = PyArg_ParseTupleAndKeywords(args, keywds, "s#|O&O&O&O&s#s:compress",
                         const_cast<char **>(kwlist),
                         &input, &length,
                         &mode_convertor, &mode,
                         &quality_convertor, &quality,
                         &lgwin_convertor, &lgwin,
                         &lgblock_convertor, &lgblock,
-                        &custom_dictionary, &custom_dictionary_length);
+                        &custom_dictionary, &custom_dictionary_length,
+                        &comment);
   if (!ok)
     return NULL;
 
@@ -153,6 +157,7 @@ static PyObject* brotli_compress(PyObject *self, PyObject *args, PyObject *keywd
     params.lgwin = lgwin;
   if (lgblock != -1)
     params.lgblock = lgblock;
+  params.comment = comment;
 
   if (custom_dictionary_length == 0) {
     ok = BrotliCompressBuffer(params, length, input,

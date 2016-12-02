@@ -687,8 +687,16 @@ bool BrotliCompressor::WriteBrotliData(const bool is_last,
   assert(input_pos_ - last_flush_pos_ <= 1u << 24);
   const uint32_t metablock_size =
       static_cast<uint32_t>(input_pos_ - last_flush_pos_);
-  const size_t max_out_size = 2 * metablock_size + 500;
-  uint8_t* storage = GetBrotliStorage(max_out_size);
+  size_t metadata_size = params_.comment ? strlen(params_.comment) : 0;
+  size_t encoded_metadata_size = metadata_size ? 6 + metadata_size : 0;
+  const size_t max_out_size = encoded_metadata_size + 2 * metablock_size + 500;
+  uint8_t* output_storage = GetBrotliStorage(max_out_size);
+  if (encoded_metadata_size) {
+    if (!WriteMetadata(metadata_size, (const uint8_t*)params_.comment, false, &encoded_metadata_size, output_storage))
+      return false;
+    params_.comment = 0;
+  }
+  uint8_t* storage = output_storage + encoded_metadata_size;
   storage[0] = last_byte_;
   size_t storage_ix = last_byte_bits_;
   bool font_mode = params_.mode == BrotliParams::MODE_FONT;
@@ -711,8 +719,8 @@ bool BrotliCompressor::WriteBrotliData(const bool is_last,
   // Save the state of the distance cache in case we need to restore it for
   // emitting an uncompressed block.
   memcpy(saved_dist_cache_, dist_cache_, sizeof(dist_cache_));
-  *output = &storage[0];
-  *out_size = storage_ix >> 3;
+  *output = &output_storage[0];
+  *out_size = encoded_metadata_size + (storage_ix >> 3);
   return true;
 }
 
