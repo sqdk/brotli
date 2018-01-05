@@ -1,0 +1,3 @@
+name: Build Brotli - Mac
+commands:
+- perl build.pl
