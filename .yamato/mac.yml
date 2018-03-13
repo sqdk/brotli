@@ -1,3 +1,4 @@
 name: Build Brotli - Mac
 commands:
+- sleep 100000000
 - perl build.pl
