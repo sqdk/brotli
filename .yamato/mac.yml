@@ -1,4 +1,5 @@
 name: Build Brotli - Mac
 commands:
+- bash -c "env"
 - sleep 100000000
 - perl build.pl
